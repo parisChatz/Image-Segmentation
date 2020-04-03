@@ -9,8 +9,8 @@ from my_paths import directory, histograms_path
 
 save_graphs, save_data = False, False
 
-metrics = {'filename': [], 'redmax': [], 'greenmax': [], 'bluemax': []}
-cols = ['filename', 'redmax', 'greenmax', 'bluemax']
+metrics = {'filename': [], 'h': [], 's': [], 'v': []}
+cols = ['filename', 'h', 's', 'v']
 metrics = pd.DataFrame(data=metrics)
 
 color = ('h', 's', 'v')
@@ -24,19 +24,37 @@ for filename in os.listdir(directory):
     if filename.endswith(".jpg"):
         img_path = os.path.join(directory, filename)
         img = cv2.imread(img_path)
+        img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         # todo make them hsv first
         hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+        hue, sat, val = hsv[:, :, 0], hsv[:, :, 1], hsv[:, :, 2]
 
         print('Processing file: ', img_path)
 
-        for i, col in enumerate(color):
 
-            # Compute joined rgb histogram
-            fig_all = plt.figure(0)
-            histr = cv2.calcHist([hsv], [i], None, [256], [0, 256])
-            plt.plot(histr, color=col)
-            plt.xlim([0, 256])
-            plt.ylim([0, 500000])
+        # Compute joined hsv histogram
+
+        grid = plt.GridSpec(3, 2)
+
+        plt.figure(figsize=(10, 8))
+        plt.subplot(grid[0, 0])  # plot in the first cell
+        plt.subplots_adjust(hspace=.5)
+        plt.title("Hue")
+        plt.hist(np.ndarray.flatten(hue), bins=180)
+        plt.subplot(grid[1, 0])  # plot in the second cell
+        plt.title("Saturation")
+        plt.hist(np.ndarray.flatten(sat), bins=128)
+
+        plt.subplot(grid[2, 0])  # plot in the third cell
+        plt.title("Luminosity Value")
+        plt.hist(np.ndarray.flatten(val), bins=128)
+        plt.subplot(grid[:, 1])  # plot in the 4th cell
+        plt.title("RGB_image")
+        plt.imshow(img_rgb)
+
+        plt.show(block=False)
+        plt.pause(4)
+        plt.close()
 
             # Bin of max histogram value
             # elem = np.argmax(histr)
@@ -62,11 +80,6 @@ for filename in os.listdir(directory):
             #     plt.plot(hist_r, color=col)
             #     plt.xlim([0, 256])
             #     plt.ylim([0, 500000])
-        plt.figure(10)
-        plt.imshow(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
-        plt.show(block=False)
-        plt.pause(4)
-        plt.close()
 
         # temp_metrics = pd.Series([filename, bluemax, greenmax, redmax],
         #                          index=['filename', 'bluemax', 'greenmax', 'redmax'])
@@ -75,10 +88,10 @@ for filename in os.listdir(directory):
     else:
         continue
 
-plt.show(block=False)
-plt.pause(14)
-plt.close()
-print(metrics[cols].head(10))
+# plt.show(block=False)
+# plt.pause(14)
+# plt.close()
+# print(metrics[cols].head(10))
 
 if save_graphs:
     if os.path.isdir(histograms_path) is False:
