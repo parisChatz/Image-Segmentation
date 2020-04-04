@@ -22,68 +22,43 @@ fig_r = 0
 
 for filename in os.listdir(directory):
     if filename.endswith(".jpg"):
-        img_path = os.path.join(directory, filename)
-        img = cv2.imread(img_path)
-        img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-        # todo make them hsv first
-        hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
-        hue, sat, val = hsv[:, :, 0], hsv[:, :, 1], hsv[:, :, 2]
+        if filename == "ISIC_0000220.jpg":
+            print(filename)
+            img_path = os.path.join(directory, filename)
+            img = cv2.imread(img_path)
+            img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
-        print('Processing file: ', img_path)
+            hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+            hue, sat, val = hsv[:, :, 0], hsv[:, :, 1], hsv[:, :, 2]
+
+            print('Processing file: ', img_path)
 
 
-        # Compute joined hsv histogram
+            # Compute joined hsv histogram
 
-        grid = plt.GridSpec(3, 2)
+            grid = plt.GridSpec(3, 2)
 
-        plt.figure(figsize=(10, 8))
-        plt.subplot(grid[0, 0])  # plot in the first cell
-        plt.subplots_adjust(hspace=.5)
-        plt.title("Hue")
-        plt.hist(np.ndarray.flatten(hue), bins=180)
-        plt.subplot(grid[1, 0])  # plot in the second cell
-        plt.title("Saturation")
-        plt.hist(np.ndarray.flatten(sat), bins=128)
+            plt.figure(figsize=(10, 8))
+            plt.subplot(grid[0, 0])  # plot in the first cell
+            plt.subplots_adjust(hspace=.5)
+            plt.title("Hue")
+            plt.hist(np.ndarray.flatten(hue), bins=180)
+            plt.subplot(grid[1, 0])  # plot in the second cell
+            plt.title("Saturation")
+            plt.hist(np.ndarray.flatten(sat), bins=128)
 
-        plt.subplot(grid[2, 0])  # plot in the third cell
-        plt.title("Luminosity Value")
-        plt.hist(np.ndarray.flatten(val), bins=128)
-        plt.subplot(grid[:, 1])  # plot in the 4th cell
-        plt.title("RGB_image")
-        plt.imshow(img_rgb)
+            plt.subplot(grid[2, 0])  # plot in the third cell
+            plt.title("Luminosity Value")
+            plt.hist(np.ndarray.flatten(val), bins=128)
+            plt.subplot(grid[:, 1])  # plot in the 4th cell
+            plt.title("RGB_image")
+            plt.imshow(img_rgb)
 
-        plt.show(block=False)
-        plt.pause(4)
-        plt.close()
+            plt.show(block=False)
+            plt.pause(40)
+            plt.close()
 
-            # Bin of max histogram value
-            # elem = np.argmax(histr)
 
-            # if col == 'b':
-            #     bluemax = elem
-            #     hist_b = cv2.calcHist([img], [i], None, [256], [0, 256])
-            #     fig_b = plt.figure(1)
-            #     plt.plot(hist_b, color=col)
-            #     plt.xlim([0, 256])
-            #     plt.ylim([0, 500000])
-            # elif col == 'g':
-            #     greenmax = elem
-            #     hist_g = cv2.calcHist([img], [i], None, [256], [0, 256])
-            #     fig_g = plt.figure(2)
-            #     plt.plot(hist_g, color=col)
-            #     plt.xlim([0, 256])
-            #     plt.ylim([0, 500000])
-            # elif col == 'r':
-            #     redmax = elem
-            #     hist_r = cv2.calcHist([img], [i], None, [256], [0, 256])
-            #     fig_r = plt.figure(3)
-            #     plt.plot(hist_r, color=col)
-            #     plt.xlim([0, 256])
-            #     plt.ylim([0, 500000])
-
-        # temp_metrics = pd.Series([filename, bluemax, greenmax, redmax],
-        #                          index=['filename', 'bluemax', 'greenmax', 'redmax'])
-        # metrics = metrics.append(temp_metrics, ignore_index=True)
 
     else:
         continue
