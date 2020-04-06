@@ -172,7 +172,8 @@ for curr_kernel_size in kernel_sizes:
                                      index=['filename', 'dice', 'mean_dice'])
             metrics = metrics.append(temp_metrics, ignore_index=True)
 
-            print(metrics.head(20))
+            print(metrics.head(60))
+            print(kernel_best)
             print("_" * 20)
 
     if dice_mean > max_mean_dice:
