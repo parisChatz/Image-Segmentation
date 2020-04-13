@@ -7,13 +7,14 @@ import pandas as pd
 from my_paths import directory, save_dir, gt_path
 from dice import dice
 
-dice_sum = 0
-counter = 0
-dice_mean = 0
-
 metrics = {'filename': [], 'dice': [], 'mean_dice': []}
 cols = ['filename', 'dice', 'mean_dice']
 metrics = pd.DataFrame(data=metrics)
+max_mean_dice = 0
+kernel_best = (0, 0)
+kernel_sizes = [13]
+
+dice_array = []
 
 # Read the image and perfrom an OTSU threshold
 for filename in os.listdir(directory):
@@ -25,45 +26,27 @@ for filename in os.listdir(directory):
         img = cv2.imread(img_path)
         image_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
-        kernel_size = (9, 9)
+        kernel_size = (13, 13)
         kernel = np.ones(kernel_size, np.uint8)
 
         # Perform closing to remove hair and blur the image
         closing = cv2.morphologyEx(img, cv2.MORPH_CLOSE, kernel, iterations=2)
-        # closing2 = cv2.morphologyEx(closing, cv2.MORPH_OPEN, kernel, iterations=2)
+        closing2 = cv2.morphologyEx(closing, cv2.MORPH_OPEN, kernel, iterations=2)
 
-        blur = cv2.blur(closing, kernel_size)
-        blur = cv2.medianBlur(blur, kernel_size[0])
-        blur = cv2.GaussianBlur(blur, kernel_size, 2)
+        # blur = cv2.blur(closing2, kernel_size)
+        # blur = cv2.medianBlur(blur, kernel_size[0])
+        blur = cv2.GaussianBlur(closing2, kernel_size, 2)
 
         image2 = blur
 
         # Binarize the image
-        gray = cv2.cvtColor(blur, cv2.COLOR_BGR2GRAY)
+        gray = cv2.cvtColor(image2, cv2.COLOR_BGR2GRAY)
         _, thresh = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
 
-        #################################################
-
-        grid = plt.GridSpec(1, 2)
-
-        plt.figure(figsize=(10, 8))
-        plt.subplot(grid[0, 0])  # plot in the first cell
-        plt.subplots_adjust(hspace=.5)
-        plt.title("hist")
-        plt.hist(thresh.ravel(), 256, [0, 256])
-
-        plt.subplot(grid[:, 1])  # plot in the 4th cell
-        plt.title("RGB_image")
-        plt.imshow(thresh, cmap='gray')
-        plt.show(block=False)
-        plt.pause(1)
-        plt.close()
-
-        #################################################
-
-        ret, mask = cv2.threshold(thresh, 94, 255, cv2.THRESH_BINARY)  # THIS IS THE FINAL MASK!!!!
+        ret, mask = cv2.threshold(thresh, max(np.unique(thresh)) - 10, 255,
+                                  cv2.THRESH_BINARY)  # THIS IS THE FINAL MASK!!!!
         # Search for contours and select the biggest one
-        contours, hierarchy = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
+        contours, hierarchy = cv2.findContours(mask, cv2.RECURS_FILTER, cv2.CHAIN_APPROX_NONE)
         cnt = max(contours, key=cv2.contourArea)
 
         h, w = img.shape[:2]
@@ -104,9 +87,9 @@ for filename in os.listdir(directory):
         # plt.pause(2)
         # plt.close()
 
-        dice_sum += dice_score
-        counter += 1
-        dice_mean = dice_sum / counter
+        dice_array.append(dice_score)
+        dice_mean = np.mean(dice_array)
+
         temp_metrics = pd.Series([filename, dice_score, dice_mean],
                                  index=['filename', 'dice', 'mean_dice'])
         metrics = metrics.append(temp_metrics, ignore_index=True)
@@ -114,3 +97,9 @@ for filename in os.listdir(directory):
         print(metrics.head(60))
         print("_" * 20)
 
+    if dice_mean > max_mean_dice:
+        max_mean_dice = dice_mean
+        kernel_best = kernel_size
+
+    print(kernel_best)
+metrics[cols].to_csv(save_dir + "otsu_metrics.csv", index=False)
