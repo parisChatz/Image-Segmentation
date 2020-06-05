@@ -1,9 +1,8 @@
 import numpy as np
 import cv2
-import matplotlib.pyplot as plt
-
 import os
 import pandas as pd
+
 from my_paths import directory, save_dir, gt_path
 from dice import dice
 from plots import plot_results_k

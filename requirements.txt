@@ -1,0 +1,5 @@
+numpy~=1.18.5
+opencv-python~=4.2.0.34
+matplotlib~=3.0.3
+pandas~=0.24.2
+imutils~=0.5.3

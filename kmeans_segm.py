@@ -1,13 +1,9 @@
 import cv2
 import numpy as np
-import matplotlib.pyplot as plt
 import os
 import pandas as pd
 import imutils
 
-# TODO do a barchart of pic and dice
-# TODO tune cv
-# TODO create functions
 
 # Custom libs
 from my_paths import directory, save_dir
