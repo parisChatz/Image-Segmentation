@@ -17,7 +17,6 @@ for filename in os.listdir(directory):
 y_pos = np.arange(len(name_list))
 
 df = pd.read_csv(save_dir + "otsu_metrics.csv")
-# print(df.head())
 
 for i, key in enumerate(name_list):
     scores.append(df["dice"][i])
